@@ -1,0 +1,93 @@
+package com.yourcompany.yourapp.presentation.screens.{{FEATURE}}
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.yourcompany.yourapp.domain.model.{{MODEL}}
+import com.yourcompany.yourapp.domain.usecase.{{USE_CASE}}
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+/**
+ * UI State for {{FEATURE}} screen
+ * 
+ * @param isLoading Loading state indicator
+ * @param data Main data to display
+ * @param error Error message if operation failed
+ */
+data class {{FEATURE}}UiState(
+    val isLoading: Boolean = false,
+    val data: List<{{MODEL}}> = emptyList(),
+    val error: String? = null
+)
+
+/**
+ * ViewModel for {{FEATURE}} screen
+ * Manages UI state and business logic interactions
+ */
+@HiltViewModel
+class {{FEATURE}}ViewModel @Inject constructor(
+    private val {{USE_CASE_VAR}}: {{USE_CASE}}
+) : ViewModel() {
+    
+    // Private mutable state for internal updates
+    private val _uiState = MutableStateFlow({{FEATURE}}UiState())
+    
+    // Public immutable state for UI observation
+    val uiState: StateFlow<{{FEATURE}}UiState> = _uiState.asStateFlow()
+    
+    init {
+        // Load initial data
+        loadData()
+    }
+    
+    /**
+     * Load data from use case
+     * Updates UI state based on result
+     */
+    fun loadData() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, error = null) }
+            
+            {{USE_CASE_VAR}}().collect { result ->
+                result.fold(
+                    onSuccess = { data ->
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                data = data,
+                                error = null
+                            )
+                        }
+                    },
+                    onFailure = { exception ->
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                error = exception.message ?: "Unknown error occurred"
+                            )
+                        }
+                    }
+                )
+            }
+        }
+    }
+    
+    /**
+     * Handle refresh action from UI
+     */
+    fun onRefresh() {
+        loadData()
+    }
+    
+    /**
+     * Clear error state
+     */
+    fun clearError() {
+        _uiState.update { it.copy(error = null) }
+    }
+}

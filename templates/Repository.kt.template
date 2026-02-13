@@ -1,0 +1,94 @@
+package com.yourcompany.yourapp.data.repository
+
+import com.yourcompany.yourapp.data.local.dao.{{DAO}}
+import com.yourcompany.yourapp.data.mapper.toDomain
+import com.yourcompany.yourapp.data.mapper.toEntity
+import com.yourcompany.yourapp.data.remote.api.ApiService
+import com.yourcompany.yourapp.domain.model.{{MODEL}}
+import com.yourcompany.yourapp.domain.repository.{{REPOSITORY}}
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import javax.inject.Inject
+
+/**
+ * Implementation of {{REPOSITORY}}
+ * 
+ * Implements caching strategy:
+ * 1. Try to fetch from remote API
+ * 2. Cache successful results locally
+ * 3. On failure, return cached data if available
+ * 4. Otherwise, emit error
+ */
+class {{REPOSITORY}}Impl @Inject constructor(
+    private val apiService: ApiService,
+    private val {{DAO_VAR}}: {{DAO}}
+) : {{REPOSITORY}} {
+    
+    override fun get{{MODEL}}s(): Flow<Result<List<{{MODEL}}>>> = flow {
+        try {
+            // Fetch from remote API
+            val response = apiService.get{{MODEL}}s()
+            
+            if (response.isSuccessful && response.body() != null) {
+                val items = response.body()!!.map { it.toDomain() }
+                
+                // Cache locally for offline access
+                {{DAO_VAR}}.insertAll(items.map { it.toEntity() })
+                
+                emit(Result.success(items))
+            } else {
+                // API call failed, try local cache
+                val cachedItems = {{DAO_VAR}}.getAll().map { it.toDomain() }
+                
+                if (cachedItems.isNotEmpty()) {
+                    emit(Result.success(cachedItems))
+                } else {
+                    emit(Result.failure(Exception("API Error: ${response.code()}")))
+                }
+            }
+        } catch (e: Exception) {
+            // Network error, return cached data
+            val cachedItems = {{DAO_VAR}}.getAll().map { it.toDomain() }
+            
+            if (cachedItems.isNotEmpty()) {
+                emit(Result.success(cachedItems))
+            } else {
+                emit(Result.failure(e))
+            }
+        }
+    }
+    
+    override suspend fun get{{MODEL}}ById(id: Int): Result<{{MODEL}}> {
+        return try {
+            // Try remote first
+            val response = apiService.get{{MODEL}}ById(id)
+            
+            if (response.isSuccessful && response.body() != null) {
+                val item = response.body()!!.toDomain()
+                
+                // Update cache
+                {{DAO_VAR}}.insert(item.toEntity())
+                
+                Result.success(item)
+            } else {
+                // Fallback to cache
+                val cached = {{DAO_VAR}}.getById(id)?.toDomain()
+                
+                if (cached != null) {
+                    Result.success(cached)
+                } else {
+                    Result.failure(Exception("{{MODEL}} not found"))
+                }
+            }
+        } catch (e: Exception) {
+            // Try cache on error
+            val cached = {{DAO_VAR}}.getById(id)?.toDomain()
+            
+            if (cached != null) {
+                Result.success(cached)
+            } else {
+                Result.failure(e)
+            }
+        }
+    }
+}

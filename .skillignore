@@ -1,0 +1,17 @@
+# Files to exclude when publishing skill
+
+# Development files
+.git/
+.gitignore
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.idea/
+.vscode/
+*.iml

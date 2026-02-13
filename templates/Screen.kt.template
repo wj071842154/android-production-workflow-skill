@@ -1,0 +1,193 @@
+package com.yourcompany.yourapp.presentation.screens.{{FEATURE}}
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.yourcompany.yourapp.domain.model.{{MODEL}}
+
+/**
+ * {{FEATURE}} Screen
+ * 
+ * Displays list of {{MODEL}} items with loading, error, and empty states
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun {{FEATURE}}Screen(
+    viewModel: {{FEATURE}}ViewModel = hiltViewModel(),
+    onItemClick: ({{MODEL}}) -> Unit = {}
+) {
+    // Collect UI state with lifecycle awareness
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("{{FEATURE}}") },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                ),
+                actions = {
+                    IconButton(onClick = { viewModel.onRefresh() }) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "Refresh"
+                        )
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            when {
+                // Loading state
+                uiState.isLoading -> {
+                    LoadingIndicator(
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+                
+                // Error state
+                uiState.error != null -> {
+                    ErrorContent(
+                        message = uiState.error!!,
+                        onRetry = { viewModel.onRefresh() },
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+                
+                // Empty state
+                uiState.data.isEmpty() -> {
+                    EmptyContent(
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+                
+                // Success state with data
+                else -> {
+                    {{MODEL}}List(
+                        items = uiState.data,
+                        onItemClick = onItemClick
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun {{MODEL}}List(
+    items: List<{{MODEL}}>,
+    onItemClick: ({{MODEL}}) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        items(items = items, key = { it.id }) { item ->
+            {{MODEL}}Card(
+                item = item,
+                onClick = { onItemClick(item) }
+            )
+        }
+    }
+}
+
+@Composable
+fun {{MODEL}}Card(
+    item: {{MODEL}},
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        onClick = onClick,
+        modifier = modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = item.name,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            
+            Text(
+                text = item.description,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+fun LoadingIndicator(modifier: Modifier = Modifier) {
+    CircularProgressIndicator(
+        modifier = modifier
+    )
+}
+
+@Composable
+fun ErrorContent(
+    message: String,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(
+            text = message,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.error
+        )
+        
+        Button(onClick = onRetry) {
+            Text("Retry")
+        }
+    }
+}
+
+@Composable
+fun EmptyContent(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier.padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            text = "No items found",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        
+        Text(
+            text = "Pull to refresh or check back later",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}

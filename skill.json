@@ -1,0 +1,59 @@
+{
+  "name": "android-production-workflow",
+  "version": "1.0.0",
+  "description": "Complete production-ready Android development workflow using Jetpack Compose, MVVM, Clean Architecture, and Material Design 3",
+  "author": "Custom Production Skill",
+  "license": "MIT",
+  "keywords": [
+    "android",
+    "jetpack-compose",
+    "mvvm",
+    "clean-architecture",
+    "material-design-3",
+    "hilt",
+    "kotlin",
+    "coroutines",
+    "retrofit",
+    "room"
+  ],
+  "categories": [
+    "android",
+    "mobile",
+    "architecture",
+    "ui",
+    "backend"
+  ],
+  "skillType": "workflow",
+  "targetAgents": [
+    "opencode",
+    "claude",
+    "github-copilot"
+  ],
+  "contents": {
+    "documentation": [
+      "SKILL.md",
+      "docs/QuickStartGuide.md",
+      "examples/UserManagementExample.md"
+    ],
+    "templates": [
+      "templates/build.gradle.kts.template",
+      "templates/Theme.kt.template",
+      "templates/ViewModel.kt.template",
+      "templates/Repository.kt.template",
+      "templates/Screen.kt.template"
+    ]
+  },
+  "dependencies": {
+    "gradle": "8.2+",
+    "kotlin": "1.9.20+",
+    "compose-bom": "2024.01.00",
+    "hilt": "2.48",
+    "retrofit": "2.9.0",
+    "room": "2.6.1"
+  },
+  "metadata": {
+    "minSDK": 24,
+    "targetSDK": 34,
+    "compileSdk": 34
+  }
+}
