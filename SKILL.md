@@ -1,7 +1,22 @@
+---
+name: Android Production Workflow
+description: Complete production-ready Android development workflow with Jetpack Compose, MVVM, Clean Architecture, Material Design 3, and Hilt DI
+version: 1.0.0
+author: wj071842154
+tags:
+  - android
+  - jetpack-compose
+  - mvvm
+  - material-design
+  - clean-architecture
+  - kotlin
+  - hilt
+---
+
 # Android Production Workflow - Jetpack Compose + MVVM + Material Design 3
 
 **Version:** 1.0.0  
-**Author:** Custom Production Skill  
+**Author:** wj071842154  
 **Last Updated:** 2026-02-13
 
 ---
